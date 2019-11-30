@@ -1,6 +1,5 @@
 package UbaJobs::Controller::Base;
 use Mojo::Base 'Mojolicious::Controller', -signatures;
-use Mojo::UserAgent;
 use Mojo::URL;
 use DDP;
 
