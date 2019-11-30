@@ -7,13 +7,17 @@ sub pgrest_proxy( $self ) {
     my $c = $self->openapi->valid_input or return;
     $c->render_later;
 
-    my $input  = $self->validation->output;
-    my $name   = $c->match->endpoint->name;
-    my $method = $c->req->method;
-    my $params = $c->req->params->to_hash;
-    my $json   = $c->req->json;
+    my $input   = $c->validation->output;
+    my $name    = $c->match->endpoint->name;
+    my $method  = $c->req->method;
+    my $params  = $c->req->params->to_hash;
+    my $json    = $c->req->json;
+    my $host    = $c->openapi->spec("/host");
+    my $schemes = $c->openapi->spec("/schemes");
 
-    my $uri = Mojo::URL->new( $c->app->pg_rest );
+    my $uri = Mojo::URL->new;
+    $uri->scheme($schemes->[0]);
+    $uri->host($host);
     $uri->path($name);
     $uri->query($params) if $params && keys %$params > 0;
 
@@ -28,8 +32,8 @@ sub pgrest_proxy( $self ) {
     $c->ua->start_p($tx)->then(
         sub( $tx ) {
             my $res = $tx->result;
-            $self->render( json => $res->json,    status => $res->code ) if $res->json;
-            $self->render( text => 'No response', status => $res->code );
+            $c->render( json => $res->json,    status => $res->code ) if $res->json;
+            $c->render( text => 'No response', status => $res->code );
         }
     )->catch( sub( $err ) { warn "Error proxying request:  $err" } );
 }

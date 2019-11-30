@@ -3,8 +3,6 @@ use Mojo::Base 'Mojolicious', -signatures;
 use Mojo::JSON qw( encode_json decode_json );
 use DDP;
 
-has pg_rest => sub { 'http://localhost:4000' };
-
 sub startup ($self) {
     # set all openapi routes to the proxied pgREST
     $self->hook(
