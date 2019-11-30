@@ -31,7 +31,7 @@ sub pgrest_proxy( $self ) {
             $self->render( json => $res->json,    status => $res->code ) if $res->json;
             $self->render( text => 'No response', status => $res->code );
         }
-    )->catch( sub( $err ) { warn "Error saving new user:  $err" } );
+    )->catch( sub( $err ) { warn "Error proxying request:  $err" } );
 }
 
 1;
