@@ -19,7 +19,7 @@ sub _load_plugins ($self) {
     $self->_load_openapi( $config->{openApi} );
 }
 
-# Create the helpers to call postgREST endpoints
+# helper to call postgREST endpoints
 sub _set_helpers ($self) {
 
     # Handler to build HTTP transaction with postgREST
@@ -53,13 +53,14 @@ sub _set_helpers ($self) {
             return;
         }
 
+        $c->app->log->debug("pgREST ($method): $url");
         return $c->ua->start_p($tx);
     };
 
     $self->helper( pg => $pgrest );
 }
 
-# Load OpenAPI from postgREST.
+# Load OpenAPI from postgREST, setting routes
 sub _load_openapi ( $self, $url ) {
 
     # get schema from pgREST, place x-mojo-to refs
