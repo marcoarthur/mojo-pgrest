@@ -5,7 +5,7 @@ use Test::Mojo;
 
 my $t = Test::Mojo->new('UbaJobs');
 $t->get_ok('/api')->status_is(200);
-$t->delete_ok('/api/users?email=arthurpbs@gmail.com');
+$t->delete_ok('/api/users?email=eq.arthurpbs@gmail.com');
 $t->post_ok(
     '/api/users' => json => {
         first_name  => 'Marco',
@@ -14,13 +14,12 @@ $t->post_ok(
         birthday    => '1981-11-26',
         email       => 'arthurpbs@gmail.com',
     }
-)->status_is(201)
-->json_is( '/email' => 'arthurpbs@gmail.com' )
-->json_is( '/first_name' => 'Marco' )
-->json_is( '/last_name' => 'Silva' );
+)->status_is(201);
 
-$t->get_ok('/api/users?email=arthurpbs@gmail.com')
+$t->get_ok('/api/users?email=eq.arthurpbs@gmail.com')
 ->status_is(200)
-->json_is('/0/email' => 'arthurpbs@gmail.com');
+->json_is( '/0/email' => 'arthurpbs@gmail.com' )
+->json_is( '/0/first_name' => 'Marco' )
+->json_is( '/0/last_name'  => 'Silva' );
 
 done_testing();
