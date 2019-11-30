@@ -4,6 +4,7 @@ use DDP;
 
 # TODO: why is not validating ? The pgREST swagger spec seems flawed
 
+# TODO: analyse code repetition
 sub new_user ($self) {
 
     my $c = $self->openapi->valid_input or return;

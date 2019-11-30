@@ -8,6 +8,14 @@ use DDP;
 has pg_rest => sub { 'http://localhost:4000' };
 
 sub startup ($self) {
+    # set all openapi routes to the proxied pgREST
+    $self->hook(
+        openapi_routes_added => sub( $openapi, $routes ) {
+            for my $route (@$routes) {
+                $route->to('base#pgrest_proxy');
+            }
+        }
+    );
     $self->_load_plugins;
     $self->_set_helpers;
 }
@@ -16,7 +24,8 @@ sub _load_plugins ($self) {
 
     my $config = $self->plugin('Config');
     $self->secrets( $config->{secrets} );
-    $self->_load_openapi( $config->{openApi} );
+    my $p = $self->_load_openapi( $config->{openApi} );
+
 }
 
 # helper to call postgREST endpoints
@@ -30,7 +39,8 @@ sub _set_helpers ($self) {
     #  $end_point: the pgREST endpoint. '/users' | '/resumes' ...
     #  $args: hash_ref with complementary arguments
     #
-    # Output: Mojo::Promise for the http transaction
+    # Output:
+    #  $promise: Mojo::Promise for the http transaction
     #
     # TODO: refactor the hole thing, too ugly
     my $pgrest = sub ( $c, $method, $end_point, $args ) {
@@ -65,9 +75,11 @@ sub _load_openapi ( $self, $url ) {
 
     # get schema from pgREST, place x-mojo-to refs
     my $json = $self->ua->get($url)->result->json or die "Can't get schema";
-    $json->{paths}->{'/users'}->{post}->{'x-mojo-to'}   = "user#new_user";
-    $json->{paths}->{'/users'}->{delete}->{'x-mojo-to'} = "user#del_user";
-    $json->{paths}->{'/users'}->{get}->{'x-mojo-to'} = "user#list_user";
+#    $json->{paths}->{'/users'}->{post}->{'x-mojo-to'}   = "base#pgrest_proxy";
+#    $json->{paths}->{'/users'}->{delete}->{'x-mojo-to'} = "base#pgrest_proxy";
+#    $json->{paths}->{'/users'}->{get}->{'x-mojo-to'} = "base#pgrest_proxy";
+#    $json->{paths}->{'/experiences'}->{get}->{'x-mojo-to'} = "base#pgrest_proxy";
+#    $json->{paths}->{'/resumes'}->{get}->{'x-mojo-to'} = "base#pgrest_proxy";
 
     my $p = $self->plugin( 'OpenAPI' => { url => $json } );
 
@@ -81,6 +93,7 @@ sub _load_openapi ( $self, $url ) {
     $p->validator->formats->{text}                = sub { return undef };
     $p->validator->formats->{'character varying'} = sub { return undef };
 
+    return $p;
 }
 
 1;
