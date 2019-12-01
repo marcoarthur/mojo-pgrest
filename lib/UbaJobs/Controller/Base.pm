@@ -12,6 +12,7 @@ sub pgrest_proxy( $self ) {
     my $method  = $c->req->method;
     my $params  = $c->req->params->to_hash;
     my $json    = $c->req->json;
+    my $headers = $c->req->headers;
     my $host    = $c->openapi->spec("/host");
     my $schemes = $c->openapi->spec("/schemes");
 
@@ -26,6 +27,9 @@ sub pgrest_proxy( $self ) {
         $json && keys %$json
       ? $c->ua->build_tx( $method => $uri => json => $json )
       : $c->ua->build_tx( $method => $uri );
+
+    # copy auth headers
+    $tx->req->headers->authorization($headers->authorization);
     $tx->req->headers->accept('application/json');
     $c->app->log->debug("Calling pgREST ($method): $uri");
 
