@@ -1,6 +1,5 @@
 package UbaJobs;
 use Mojo::Base 'Mojolicious', -signatures;
-use Mojo::JSON qw( encode_json decode_json );
 use DDP;
 
 sub startup ($self) {
