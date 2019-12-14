@@ -12,5 +12,4 @@ OpenREST. This scenario maybe useful for many situations, including auth step.
 
 # Bugs
 
-Still work in progress
-
+Still work in progress, please submit
